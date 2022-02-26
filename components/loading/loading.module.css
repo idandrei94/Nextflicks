@@ -1,3 +1,9 @@
+.container {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+}
+
 /** source: https://projects.lukehaas.me/css-loaders/ **/
 .loader,
 .loader:before,
@@ -24,7 +30,7 @@
 }
 .loader:before,
 .loader:after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
 }

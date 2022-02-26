@@ -3,6 +3,7 @@
   background-color: --var(--black50);
   padding-left: 1rem /* 16px */;
   padding-right: 1rem /* 16px */;
+  margin-bottom: 2rem;
 }
 
 .title {
@@ -13,8 +14,7 @@
 
 .cardWrapper {
   display: flex;
-  padding-top: 1.7rem;
-  padding-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
   margin-top: 1.5rem /* 24px */;
   margin-right: 0.75rem /* 12px */;
   overflow-x: scroll;
@@ -42,4 +42,22 @@
     padding-left: 4rem /* 64px */;
     padding-right: 4rem /* 64px */;
   }
+}
+
+.cardWrapper::-webkit-scrollbar {
+  margin: 0;
+  padding: 0;
+  height: 5px;
+  border-radius: 10%;
+  background: #333;
+}
+
+.cardWrapper::-webkit-scrollbar-button {
+  display: none;
+}
+
+.cardWrapper::-webkit-scrollbar-thumb {
+  background: #ccc;
+  height: 3px;
+  width: 3px;
 }

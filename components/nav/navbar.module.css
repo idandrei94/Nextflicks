@@ -54,6 +54,11 @@
   cursor: pointer;
 }
 
+.navItem:hover,
+.navItem2:hover {
+  color: var(--red);
+}
+
 .navContainer {
   display: flex;
   align-items: flex-start;
@@ -67,6 +72,10 @@
   color: var(--white);
 }
 
+.usernameBtn:hover {
+  color: var(--red);
+}
+
 .username {
   font-size: 1rem;
 }
@@ -74,7 +83,7 @@
 .navDropdown {
   position: absolute;
   margin-left: auto;
-  margin-top: 0.5rem /* 8px */;
+  margin-top: 0rem /* 8px */;
   padding-top: 0.5rem /* 8px */;
   padding-bottom: 0.5rem /* 8px */;
   padding-right: 0.5rem;
@@ -105,6 +114,7 @@
 
 .linkName:hover {
   text-decoration: underline;
+  color: red;
 }
 
 .lineWrapper {
