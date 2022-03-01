@@ -2,7 +2,8 @@ import Head from 'next/head';
 import React, { FormEventHandler, useState } from 'react';
 import styles from '@/styles/Login.module.css';
 import { useRouter } from 'next/router';
-import { createMagic } from 'lib/magicAuth';
+import { createMagic } from 'lib/client/magicAuth';
+import { loginWithMagicToken } from 'lib/client/clientLogin';
 
 const LoginPage = () => {
   const [userMsg, setUserMsg] = useState<string | undefined>(undefined);
@@ -19,12 +20,16 @@ const LoginPage = () => {
         const didToken = await magic.auth.loginWithMagicLink({
           email: email
         });
-        localStorage.setItem('didToken', didToken!);
-        router.push('/');
+        const { validUntil, name } = await loginWithMagicToken(didToken!);
+        localStorage.setItem('validUntil', validUntil.toString());
+        localStorage.setItem('name', name);
+        console.log('logged in');
+        setIsLoading(false);
+        //router.push('/');
       } catch (error) {
         console.log(error);
-        setUserMsg('An unknown error occured. Please try again later.');
         setIsLoading(false);
+        setUserMsg('An unknown error occured. Please try again later.');
       }
     }
   };
@@ -59,7 +64,7 @@ const LoginPage = () => {
             <button
               onClick={handleSubmit}
               className={styles.loginBtn}
-              disabled={!!userMsg || !email || isLoading}
+              disabled={!email || isLoading}
             >
               {isLoading ? 'Loading...' : 'Sign In'}
             </button>

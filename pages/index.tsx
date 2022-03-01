@@ -6,27 +6,38 @@ import SectionCards from '@/components/card/sectionCardsComponent';
 import { getVideosByKeyword } from 'lib/videosApi';
 import { Video } from '@/models/video';
 import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
 
 interface Props {
   categories: {
     title: string;
     videos: Video[];
   }[];
+  featuredVideo: Video;
 }
 
-const Home: React.FC<Props> = ({ categories }) => {
+const Home: React.FC<Props> = ({ categories, featuredVideo: propFeature }) => {
   const [categoriesState, setCategories] = useState(categories);
-  const router = useRouter();
+  const [featuredVideo, setFeaturedVideo] = useState(propFeature);
 
   useEffect(() => {
     if (!categoriesState || categoriesState.length == 0) {
+      const videos = getVideosByKeyword('');
       setCategories(
         ['Starcraft II', 'Kevin Powell', 'Dark Souls'].map((v) => ({
           title: v,
-          videos: getVideosByKeyword(v)
+          videos: videos.filter(
+            (vid) =>
+              vid.snippet.title.toLowerCase().includes(v.toLowerCase()) ||
+              vid.snippet.channelTitle
+                .toLowerCase()
+                .includes(v.toLowerCase()) ||
+              vid.snippet.description
+                .toLocaleLowerCase()
+                .includes(v.toLowerCase())
+          )
         }))
       );
+      setFeaturedVideo(videos[Math.floor(Math.random() * videos.length)]);
     }
   }, [categoriesState]);
 
@@ -37,9 +48,10 @@ const Home: React.FC<Props> = ({ categories }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <BannerComponent
-        title="Clifford the red dog"
-        subtitle="Seriously, wtf is dis shit"
-        imageUrl="/static/clifford.webp"
+        videoId={featuredVideo.id.videoId}
+        title={featuredVideo.snippet.title}
+        subtitle={featuredVideo.snippet.description}
+        imageUrl={featuredVideo.snippet.thumbnails.high.url}
       />
       <div className={styles.sectionWrapper}>
         {categories.map((c) => (
@@ -57,23 +69,23 @@ const Home: React.FC<Props> = ({ categories }) => {
 
 export default Home;
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getStaticProps: GetServerSideProps = async (ctx) => {
+  const videos = getVideosByKeyword('');
   return {
     props: {
       categories: ['Starcraft 2', 'Kevin Powell', 'Dark Souls'].map((v) => ({
         title: v,
-        videos: getVideosByKeyword(v).filter(
+        videos: videos.filter(
           (vid) =>
-            vid.id.kind === 'youtube#video' &&
-            (vid.snippet.title.toLowerCase().includes(v.toLowerCase()) ||
-              vid.snippet.channelTitle
-                .toLowerCase()
-                .includes(v.toLowerCase()) ||
-              vid.snippet.description
-                .toLocaleLowerCase()
-                .includes(v.toLowerCase()))
+            vid.snippet.title.toLowerCase().includes(v.toLowerCase()) ||
+            vid.snippet.channelTitle.toLowerCase().includes(v.toLowerCase()) ||
+            vid.snippet.description
+              .toLocaleLowerCase()
+              .includes(v.toLowerCase())
         )
-      }))
-    }
+      })),
+      featuredVideo: videos[Math.floor(Math.random() * videos.length)]
+    },
+    revalidate: 60
   };
 };

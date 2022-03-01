@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 import styles from './Banner.module.css';
 
@@ -6,9 +7,15 @@ interface Props {
   title: string;
   subtitle: string;
   imageUrl: string;
+  videoId: string;
 }
 
-const BannerComponent: React.FC<Props> = ({ title, subtitle, imageUrl }) => {
+const BannerComponent: React.FC<Props> = ({
+  title,
+  subtitle,
+  imageUrl,
+  videoId
+}) => {
   const handleOnPlay = () => {};
 
   return (
@@ -30,7 +37,9 @@ const BannerComponent: React.FC<Props> = ({ title, subtitle, imageUrl }) => {
                 width="32px"
                 height="32px"
               />
-              <span className={styles.playText}>Play</span>
+              <Link href={`/video/${videoId}`}>
+                <a className={styles.playText}>Play</a>
+              </Link>
             </button>
           </div>
         </div>

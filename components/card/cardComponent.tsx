@@ -4,6 +4,7 @@ import styles from './card.module.css';
 import { motion } from 'framer-motion';
 import classnames from 'classnames';
 import { Video } from '@/models/video';
+import Link from 'next/link';
 
 interface Props {
   video: Video;
@@ -39,19 +40,21 @@ const Card: React.FC<Props> = ({ video, size = 'medium' }) => {
   );
   return (
     <div className={styles.container}>
-      <motion.div
-        className={classnames(classMap[size], styles.imgMotionWrapper)}
-        whileHover={{ scale: 1.1 }}
-      >
-        <Image
-          priority
-          src={imageUrlState}
-          alt="card image"
-          layout="fill"
-          className={styles.cardImg}
-          onError={() => setImageUrlState(imageUrlFallback)}
-        />
-      </motion.div>
+      <Link href={`/video/${video.id.videoId}`} passHref>
+        <motion.div
+          className={classnames(classMap[size], styles.imgMotionWrapper)}
+          whileHover={{ scale: 1.1 }}
+        >
+          <Image
+            priority
+            src={imageUrlState}
+            alt="card image"
+            layout="fill"
+            className={styles.cardImg}
+            onError={() => setImageUrlState(imageUrlFallback)}
+          />
+        </motion.div>
+      </Link>
     </div>
   );
 };

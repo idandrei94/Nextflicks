@@ -1,14 +1,12 @@
-import { createMagic } from 'lib/magicAuth';
-import { route } from 'next/dist/server/router';
+import { createMagic } from 'lib/client/magicAuth';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import Router, { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './navbar.module.css';
 
 const NavComponent = () => {
   const [username, setUsername] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -24,51 +22,43 @@ const NavComponent = () => {
   };
   const handleSignout = () => {
     const magic = createMagic();
-    magic.user.logout().then(() => {});
-  };
-
-  const checkLoginStatus = () => {
-    setIsLoading(true);
-    setUsername(null);
-    const magic = createMagic();
-    const meta = magic ? magic.user.getMetadata() : undefined;
-    if (meta) {
-      meta
-        .then(({ email }) => {
-          if (email) {
-            setUsername(email);
-          } else {
-            router.push('/login');
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
+    magic.user.logout().then(() => {
+      setUsername(null);
+      localStorage.clear();
+      router.push('/login');
+    });
   };
 
   useEffect(() => {
-    router.events.on('routeChangeStart', () => {
-      checkLoginStatus();
-    });
-  }, []);
+    const email = localStorage.getItem('name');
+    const validUntil = localStorage.getItem('validUntil');
+    if (
+      email &&
+      validUntil &&
+      Date.now() / 1000 < Number.parseInt(validUntil)
+    ) {
+      if (username !== email) setUsername(email);
+    } else {
+      localStorage.clear();
+      router.push('/login');
+    }
+  }, [router.route, username]);
 
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        <a className={styles.logoLink} href="/">
-          <div className={styles.logoWrapper}>
-            <Image
-              src={'/static/netflix.svg'}
-              alt="Nextflicks logo"
-              width="111px"
-              height="30ox"
-            />
-          </div>
-        </a>
+        <Link href="/">
+          <a className={styles.logoLink}>
+            <div className={styles.logoWrapper}>
+              <Image
+                src={'/static/netflix.svg'}
+                alt="Nextflicks logo"
+                width="111px"
+                height="30ox"
+              />
+            </div>
+          </a>
+        </Link>
         {router.route !== '/login' && (
           <React.Fragment>
             <ul className={styles.navItems}>
@@ -81,7 +71,7 @@ const NavComponent = () => {
             </ul>
 
             <nav className={styles.navContainer}>
-              {username || isLoading ? (
+              {username ? (
                 <div>
                   <button
                     className={styles.usernameBtn}
@@ -90,14 +80,12 @@ const NavComponent = () => {
                     <p className={styles.username}>
                       {username || 'Loading...'}
                     </p>
-                    {!isLoading && (
-                      <Image
-                        src={'/static/expand_more.svg'}
-                        alt="Expand dropdown"
-                        height="24px"
-                        width="24px"
-                      />
-                    )}
+                    <Image
+                      src={'/static/expand_more.svg'}
+                      alt="Expand dropdown"
+                      height="24px"
+                      width="24px"
+                    />
                   </button>
                   {showDropdown && (
                     <div className={styles.navDropdown}>

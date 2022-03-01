@@ -37,7 +37,6 @@
 /** Makes video edges curvy **/
 .videoPlayer {
   border-radius: 10px 10px 0px 0px;
-  composes: borderBoxShadow;
 }
 
 /** Modal body **/
@@ -134,4 +133,8 @@
 
 .likeBtnWrapper {
   margin-right: 0.5rem /* 8px */;
+}
+
+.iframe {
+  border: none;
 }

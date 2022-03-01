@@ -1,29 +1,27 @@
 import type { AppProps } from 'next/app';
 import '@/styles/globals.css';
-import React, { useEffect, useState } from 'react';
 import NavComponent from '@/components/nav/navComponent';
-import { createMagic } from 'lib/magicAuth';
 import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 import LoadingComponent from '@/components/loading/loadingComponent';
 
 const MyApp: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
-  const [isLoading, setisLoading] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
-    router.events.on('routeChangeComplete', () => {
-      setisLoading(false);
-    });
-    setisLoading(true);
-    const checkLogin = async () => {
-      const isLoggedIn = await createMagic().user.isLoggedIn();
-      if (isLoggedIn) {
-        router.push('/');
-      } else {
-        router.push('/login');
-      }
+    const handleComplete = () => {
+      setIsLoading(false);
     };
-    checkLogin();
-  }, []);
+    router.events.on('routeChangeComplete', handleComplete);
+    router.events.on('routeChangeError', handleComplete);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleComplete);
+      router.events.off('routeChangeError', handleComplete);
+    };
+  }, [router]);
 
   return isLoading ? (
     <LoadingComponent />
