@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { LoginModel } from '@/models/loginModel';
 import { createUserMutation, fetchGraphQL, getUsersQuery, hasuraUserExists } from 'lib/db/hasura';
 import { setTokenCookie } from 'lib/server/cookies';

@@ -23,9 +23,8 @@ const LoginPage = () => {
         const { validUntil, name } = await loginWithMagicToken(didToken!);
         localStorage.setItem('validUntil', validUntil.toString());
         localStorage.setItem('name', name);
-        console.log('logged in');
-        setIsLoading(false);
-        //router.push('/');
+        console.log('logged in', validUntil, name);
+        router.push('/');
       } catch (error) {
         console.log(error);
         setIsLoading(false);

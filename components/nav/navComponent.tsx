@@ -32,12 +32,13 @@ const NavComponent = () => {
   useEffect(() => {
     const email = localStorage.getItem('name');
     const validUntil = localStorage.getItem('validUntil');
+    console.log('home page ', email, validUntil);
     if (
       email &&
       validUntil &&
       Date.now() / 1000 < Number.parseInt(validUntil)
     ) {
-      if (username !== email) setUsername(email);
+      setUsername(email);
     } else {
       localStorage.clear();
       router.push('/login');

@@ -10,7 +10,7 @@ export const createJwt = (payload: string | object | Buffer, key: string) =>
 
 export const createTokenPayload = (metadata: MagicUserMetadata) =>
 {
-    const exp = Math.floor(Date.now() / Number.parseInt(process.env.MAX_AGE || '604800'));
+    const exp = Math.floor(Date.now() / 1000 + (Number.parseInt(process.env.MAX_AGE || '604800')));
     return {
         payload: {
             ...metadata,
