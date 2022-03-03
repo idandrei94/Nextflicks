@@ -1,3 +1,4 @@
+import { hasuraLogout } from 'lib/client/clientLogin';
 import { createMagic } from 'lib/client/magicAuth';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,16 +17,14 @@ const NavComponent = () => {
     e.preventDefault();
     router.push('/');
   };
-  const handleOnClickMyList = (e: any) => {
-    e.preventDefault();
-    router.push('/browse/my-list');
-  };
   const handleSignout = () => {
     const magic = createMagic();
     magic.user.logout().then(() => {
-      setUsername(null);
-      localStorage.clear();
-      router.push('/login');
+      hasuraLogout().then(() => {
+        setUsername(null);
+        localStorage.clear();
+        router.push('/login');
+      });
     });
   };
 
@@ -66,8 +65,10 @@ const NavComponent = () => {
               <li className={styles.navItem} onClick={handleOnClickHome}>
                 Home
               </li>
-              <li className={styles.navItem2} onClick={handleOnClickMyList}>
-                MyList
+              <li className={styles.navItem2}>
+                <Link href={'/video/my-list'}>
+                  <a>MyList</a>
+                </Link>
               </li>
             </ul>
 

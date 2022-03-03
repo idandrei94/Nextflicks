@@ -23,11 +23,10 @@ export default async (req: NextApiRequest, res: NextApiResponse<LoginModel | { m
             const meta = await magicAdmin.users.getMetadataByToken(token);
             const { payload, exp } = createTokenPayload(meta);
             const jwtToken = createJwt(payload, process.env.JWT_SECRET!);
-            if (!await hasuraUserExists(meta.issuer!, jwtToken))
+            if (!await hasuraUserExists(meta.issuer!))
             {
                 console.log("User doesnt exist, creating...");
-                const { query, name } = createUserMutation;
-                console.log(await fetchGraphQL(query, name, { email: meta.email!, issuer: meta.issuer }, jwtToken));
+                console.log(await fetchGraphQL(createUserMutation, undefined, { email: meta.email!, issuer: meta.issuer }));
             } else
             {
                 console.log('user already exists');

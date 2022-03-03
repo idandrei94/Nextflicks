@@ -31,3 +31,14 @@ interface Thumbnail
     width: number;
     height: number;
 }
+
+export interface VideoStats
+{
+    favorite: number,
+    id: number,
+    userId: string,
+    videoId: string,
+    watched: boolean;
+    likeTotal: number;
+    viewsTotal: number;
+}

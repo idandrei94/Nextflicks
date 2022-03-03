@@ -10,3 +10,8 @@ export const loginWithMagicToken = async (token: string): Promise<LoginModel> =>
     })).data;
     return response;
 };
+
+export const hasuraLogout = async () =>
+{
+    return await axios.post('/api/logout', {});
+};

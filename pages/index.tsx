@@ -6,6 +6,7 @@ import SectionCards from '@/components/card/sectionCardsComponent';
 import { getVideosByKeyword } from 'lib/videosApi';
 import { Video } from '@/models/video';
 import { GetServerSideProps } from 'next';
+import { getMyVideos } from 'lib/client/clientHasuraApi';
 
 interface Props {
   categories: {
@@ -18,6 +19,7 @@ interface Props {
 const Home: React.FC<Props> = ({ categories, featuredVideo: propFeature }) => {
   const [categoriesState, setCategories] = useState(categories);
   const [featuredVideo, setFeaturedVideo] = useState(propFeature);
+  const [myVideos, setmyVideos] = useState<Video[]>([]);
 
   useEffect(() => {
     if (!categoriesState || categoriesState.length == 0) {
@@ -41,6 +43,10 @@ const Home: React.FC<Props> = ({ categories, featuredVideo: propFeature }) => {
     }
   }, [categoriesState]);
 
+  useEffect(() => {
+    getMyVideos().then((vids) => setmyVideos(vids));
+  }, []);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -53,6 +59,9 @@ const Home: React.FC<Props> = ({ categories, featuredVideo: propFeature }) => {
         subtitle={featuredVideo.snippet.description}
         imageUrl={featuredVideo.snippet.thumbnails.high.url}
       />
+      {myVideos.length > 0 && (
+        <SectionCards title="Watch again" size="small" videos={myVideos} />
+      )}
       <div className={styles.sectionWrapper}>
         {categories.map((c) => (
           <SectionCards

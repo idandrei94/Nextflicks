@@ -3,11 +3,18 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import styles from '@/styles/Video.module.css';
 import classnames from 'classnames';
-import { Video } from '@/models/video';
-import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next';
+import { Video, VideoStats } from '@/models/video';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import { getVideosByKeyword } from 'lib/videosApi';
 import LoadingComponent from '@/components/loading/loadingComponent';
 import { getVideoFromApiById } from 'lib/client/getVideoFromApi';
+import LikeIcon from '@/components/icons/like-icon';
+import DislikeIcon from '@/components/icons/dislike-icon';
+import Head from 'next/head';
+import {
+  changeVideoFavorite,
+  getVideoStatsById
+} from 'lib/client/clientHasuraApi';
 
 Modal.setAppElement('#__next');
 
@@ -15,11 +22,43 @@ interface Props {
   video: Video | null;
 }
 
+const statusToText = (status: number | undefined) => {
+  switch (status) {
+    case 1:
+      return 'like';
+    case -1:
+      return 'dislike';
+    default:
+      return 'clear';
+  }
+};
+
 const VideoPage: React.FC<Props> = ({ video }) => {
   const router = useRouter();
   const { id } = router.query;
 
   const [loadedVideo, setLoadedVideo] = useState(video);
+  const [isLoading, setisLoading] = useState(false);
+  const [videoStatsState, setvideoStatsState] = useState<
+    VideoStats | undefined
+  >(undefined);
+
+  const handleLikeButton = async (like: number) => {
+    setisLoading(true);
+    if (like === videoStatsState?.favorite) {
+      const status = await changeVideoFavorite('clear', id as string);
+      console.log(status);
+      setvideoStatsState(status);
+    } else {
+      const status = await changeVideoFavorite(
+        statusToText(like),
+        id as string
+      );
+      console.log(status);
+      setvideoStatsState(status);
+    }
+    setisLoading(false);
+  };
 
   useEffect(() => {
     if (!loadedVideo) {
@@ -28,10 +67,21 @@ const VideoPage: React.FC<Props> = ({ video }) => {
         setLoadedVideo(v);
       });
     }
+    const getVideoStats = async () => {
+      setisLoading(true);
+      const stats = await getVideoStatsById(id as string);
+      setvideoStatsState(stats);
+      setisLoading(false);
+    };
+    getVideoStats();
   }, [loadedVideo]);
 
   return loadedVideo ? (
     <div className={styles.container}>
+      <Head>
+        <title>Nextflicks | {loadedVideo.snippet.title}</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Modal
         isOpen={true}
         contentLabel="Watch dis shit"
@@ -53,7 +103,26 @@ const VideoPage: React.FC<Props> = ({ video }) => {
             styles.borderBoxShadow
           )}
         />
-
+        {!isLoading && (
+          <div className={styles.likeDislikeBtnWrapper}>
+            <div className={styles.likeBtnWrapper}>
+              <button onClick={() => handleLikeButton(1)}>
+                <div className={styles.btnWrapper}>
+                  <LikeIcon
+                    selected={videoStatsState && videoStatsState.favorite === 1}
+                  />
+                </div>
+              </button>
+            </div>
+            <button onClick={() => handleLikeButton(-1)}>
+              <div className={styles.btnWrapper}>
+                <DislikeIcon
+                  selected={videoStatsState && videoStatsState.favorite === -1}
+                />
+              </div>
+            </button>
+          </div>
+        )}
         <div className={styles.modalBody}>
           <div className={styles.modalBodyContent}>
             <div className={styles.col1}>
@@ -70,10 +139,24 @@ const VideoPage: React.FC<Props> = ({ video }) => {
                 <span className={styles.textColor}>Channel Name: </span>
                 <span>{loadedVideo.snippet.channelTitle}</span>
               </p>
-              <p className={classnames(styles.subText, styles.subTextWrapper)}>
-                <span className={styles.textColor}>View Count: </span>
-                <span>3141592</span>
-              </p>
+              {!!videoStatsState && (
+                <p
+                  className={classnames(styles.subText, styles.subTextWrapper)}
+                >
+                  <span className={styles.textColor}>View Count: </span>
+                  <span>{videoStatsState.viewsTotal}</span>
+                </p>
+              )}
+              {!!videoStatsState && (
+                <p
+                  className={classnames(styles.subText, styles.subTextWrapper)}
+                >
+                  <span className={styles.textColor}>
+                    {videoStatsState.likeTotal >= 0 ? 'Likes: ' : 'Dislikes: '}
+                  </span>
+                  <span>{Math.abs(videoStatsState.likeTotal)}</span>
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -91,7 +174,7 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     params: { id: v.id.videoId.toString() }
   }));
   return {
-    fallback: 'blocking',
+    fallback: false,
     paths: paths
   };
 };
